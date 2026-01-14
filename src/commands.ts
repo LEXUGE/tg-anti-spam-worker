@@ -99,7 +99,26 @@ export async function handleCommand(
         return;
     }
 
-    const command = message.text.split(' ')[0].toLowerCase();
+    // Split by space to get the command part (e.g., "/start@mybot")
+    const fullCommand = message.text.split(' ')[0].toLowerCase();
+
+    // Split key and bot name
+    const [commandKey, botName] = fullCommand.split('@');
+
+    // If a bot name is specified, verify it matches our bot
+    if (botName) {
+        if (config.botUsername) {
+            if (botName !== config.botUsername.toLowerCase().replace(/^@/, '')) {
+                // Command is for another bot
+                return;
+            }
+        } else {
+            // Warn if bot username is not configured but commands are being used with suffixes
+            console.warn('Received command with bot suffix but BOT_USERNAME is not configured. Processing anyway.');
+        }
+    }
+
+    const command = commandKey;
 
     switch (command) {
         case '/start':

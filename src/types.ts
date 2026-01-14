@@ -68,6 +68,7 @@ export interface Env {
     TELEGRAM_BOT_TOKEN: string;
     CHECK_THRESHOLD?: string;
     CONTEXT_MESSAGES?: string;
+    BOT_USERNAME?: string;
 }
 
 // Configuration
@@ -75,4 +76,5 @@ export interface Config {
     botToken: string;
     checkThreshold: number;
     contextMessages: number;
+    botUsername?: string;
 }

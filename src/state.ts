@@ -49,17 +49,17 @@ export async function reset(
 }
 
 /**
- * Check if a message should be processed based on the threshold
- * Increments the counter and returns true if count <= threshold
+ * Check if a user is trusted (message count > threshold)
+ * Does NOT increment changes
  */
-export async function shouldProcess(
+export async function isTrusted(
     env: Env,
     chatId: number,
     userId: number,
     threshold: number
 ): Promise<boolean> {
-    const count = await increment(env, chatId, userId);
-    return count <= threshold;
+    const count = await getCount(env, chatId, userId);
+    return count > threshold;
 }
 
 /**
@@ -119,6 +119,20 @@ export async function storeNotification(
 ): Promise<void> {
     const key = `notification:${chatId}:${userId}`;
     await env.SPAM_STATE.put(key, messageId.toString());
+}
+
+/**
+ * Get the notification message ID for a user in a chat without removing it
+ * Returns the message ID if it exists, otherwise null
+ */
+export async function getNotification(
+    env: Env,
+    chatId: number,
+    userId: number
+): Promise<number | null> {
+    const key = `notification:${chatId}:${userId}`;
+    const value = await env.SPAM_STATE.get(key);
+    return value ? parseInt(value, 10) : null;
 }
 
 /**

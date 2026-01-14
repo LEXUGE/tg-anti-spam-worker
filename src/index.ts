@@ -24,6 +24,7 @@ function buildConfig(env: Env): Config {
         botToken: env.TELEGRAM_BOT_TOKEN,
         checkThreshold: threshold,
         contextMessages: contextMessages,
+        botUsername: env.BOT_USERNAME,
     };
 }
 
@@ -31,7 +32,7 @@ function buildConfig(env: Env): Config {
  * Main worker handler
  */
 export default {
-    async fetch(request: Request, env: Env): Promise<Response> {
+    async fetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
         // Only accept POST requests
         if (request.method !== 'POST') {
             return new Response('Method not allowed', { status: 405 });
@@ -65,23 +66,25 @@ export default {
                 return new Response('OK', { status: 200 });
             }
 
-            // Check if we should process this message based on threshold
-            // This increments the counter for non-command messages
+            // Check if we should process this message based on logic:
+            // 1. Is user trusted? If yes, skip check.
+            // 2. If not trusted, check spam.
+            // 3. If safe, increment counter.
             if (message.text) {
-                const shouldCheck = await state.shouldProcess(
-                    env,
-                    message.chat.id,
-                    message.from.id,
-                    config.checkThreshold
-                );
+                const [isTrusted, context] = await Promise.all([
+                    state.isTrusted(
+                        env,
+                        message.chat.id,
+                        message.from.id,
+                        config.checkThreshold
+                    ),
+                    state.getContext(env, message.chat.id)
+                ]);
 
-                if (!shouldCheck) {
-                    // User has exceeded the threshold, skip spam check
+                if (isTrusted) {
+                    // User is trusted, skip spam check
                     return new Response('OK', { status: 200 });
                 }
-
-                // Retrieve message history context
-                const context = await state.getContext(env, message.chat.id);
 
                 // Perform spam check with context
                 const result = await checkSpam(env, message.text, context);
@@ -89,10 +92,19 @@ export default {
                 // Process spam if detected
                 if (result.msg_type !== MsgType.NotSpam) {
                     await processSpam(env, config, message, result);
-                }
+                    // Do NOT increment counter for spam
+                    // Do NOT add spam to context (saves 1 write)
+                } else {
+                    // Message is safe, increment counter (fire-and-forget)
+                    ctx.waitUntil(
+                        state.increment(env, message.chat.id, message.from.id)
+                    );
 
-                // Store message in history after processing (regardless of spam result)
-                await state.addMessage(env, message.chat.id, message, config.contextMessages);
+                    // Store message in history after processing (fire-and-forget)
+                    ctx.waitUntil(
+                        state.addMessage(env, message.chat.id, message, config.contextMessages)
+                    );
+                }
             }
 
             return new Response('OK', { status: 200 });

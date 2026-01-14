@@ -56,7 +56,7 @@ export async function processSpam(
 
     // Delete old notification if it exists
     if (user) {
-        const oldNotificationId = await state.getAndRemoveNotification(env, chat.id, user.id);
+        const oldNotificationId = await state.getNotification(env, chat.id, user.id);
         if (oldNotificationId) {
             try {
                 await deleteMessage(config, chat.id, oldNotificationId);
