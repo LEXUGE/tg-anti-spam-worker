@@ -55,9 +55,9 @@ export async function checkSpam(
                 responseMimeType: 'application/json',
                 responseSchema: spamCheckSchema.toJSONSchema({ target: "openapi-3.0" }),
                 systemInstruction: SYSTEM_PROMPT,
-                thinkingConfig: {
-                    thinkingLevel: ThinkingLevel.LOW,
-                },
+                // thinkingConfig: {
+                //     thinkingLevel: ThinkingLevel.LOW,
+                // },
             },
         });
 
