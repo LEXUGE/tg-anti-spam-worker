@@ -74,6 +74,7 @@ export default {
                 const [isTrusted, context] = await Promise.all([
                     state.isTrusted(
                         env,
+                        config,
                         message.chat.id,
                         message.from.id,
                         config.checkThreshold
@@ -87,7 +88,7 @@ export default {
                 }
 
                 // Perform spam check with context
-                const result = await checkSpam(env, message.text, context);
+                const result = await checkSpam(env, message.text, context, message.from.id);
 
                 // Process spam if detected
                 if (result.msg_type !== MsgType.NotSpam) {

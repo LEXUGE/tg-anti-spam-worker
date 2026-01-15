@@ -177,6 +177,19 @@ export async function getChatAdministrators(
 }
 
 /**
+ * Check if a user is an admin in a chat
+ */
+export async function isAdmin(
+    config: Config,
+    chatId: number,
+    userId: number
+): Promise<boolean> {
+    const admins = await getChatAdministrators(config, chatId);
+    return admins.some((admin: any) => admin.user.id === userId);
+}
+
+
+/**
  * Ban a chat member permanently
  */
 export async function banChatMember(

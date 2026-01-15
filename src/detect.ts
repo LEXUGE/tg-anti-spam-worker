@@ -10,7 +10,8 @@ const SYSTEM_PROMPT = `Content moderator for Telegram groups. Classify the curre
 export async function checkSpam(
     env: Env,
     text: string,
-    context: any[]
+    context: any[],
+    userId?: number // Make optional for backward compatibility if needed, but we plan to pass it
 ): Promise<SpamCheckResult> {
     try {
         const ai = new GoogleGenAI({ apiKey: env.GEMINI_API_KEY });
@@ -38,9 +39,13 @@ export async function checkSpam(
             const promptParts = ['History:'];
 
             for (const ctxMsg of context) {
-                const senderId = ctxMsg.from ? `User${ctxMsg.from.id}` : 'Unknown sender';
+                // Filter: Only include messages from the current user
+                if (userId && ctxMsg.from && ctxMsg.from.id !== userId) {
+                    continue;
+                }
+
                 if (ctxMsg.text) {
-                    promptParts.push(`- ${senderId}: ${ctxMsg.text}`);
+                    promptParts.push(`- ${ctxMsg.text}`);
                 }
             }
 

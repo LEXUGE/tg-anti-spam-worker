@@ -1,4 +1,5 @@
-import { Env } from './types';
+import { Env, Config } from './types';
+import { isAdmin } from './telegram';
 
 /**
  * Generate a unique key for a user in a chat
@@ -54,10 +55,18 @@ export async function reset(
  */
 export async function isTrusted(
     env: Env,
+    config: Config,
     chatId: number,
     userId: number,
     threshold: number
 ): Promise<boolean> {
+    // Check if user is an admin first
+    const isAdminUser = await isAdmin(config, chatId, userId);
+    if (isAdminUser) {
+        return true;
+    }
+
+    // Fall back to message count check
     const count = await getCount(env, chatId, userId);
     return count > threshold;
 }

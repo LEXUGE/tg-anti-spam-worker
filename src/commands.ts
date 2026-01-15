@@ -12,7 +12,8 @@ export async function handleStart(
     await sendMessage(
         config,
         message.chat.id,
-        'Hello! I am the Anti-Spam Bot powered by Cloudflare Worker AI. 🤖\n\nI monitor messages and automatically detect spam, scams, and phishing attempts.'
+        'Hello! I am the Anti-Spam Bot powered by Cloudflare Worker AI. 🤖\n\nI monitor messages and automatically detect spam, scams, and phishing attempts.',
+        message.message_id
     );
 }
 
@@ -32,7 +33,8 @@ export async function handleStats(
     await sendMessage(
         config,
         message.chat.id,
-        `Your message count: ${count}`
+        `Your message count: ${count}`,
+        message.message_id
     );
 }
 
@@ -47,7 +49,8 @@ export async function handleSave(
     await sendMessage(
         config,
         message.chat.id,
-        'State is automatically saved to Workers KV.'
+        'State is automatically saved to Workers KV.',
+        message.message_id
     );
 }
 
@@ -67,7 +70,8 @@ export async function handleReset(
     await sendMessage(
         config,
         message.chat.id,
-        'Your message count has been reset to 0.'
+        'Your message count has been reset to 0.',
+        message.message_id
     );
 }
 
@@ -83,7 +87,8 @@ export async function handleClearContext(
     await sendMessage(
         config,
         message.chat.id,
-        'Message context has been cleared.'
+        'Message context has been cleared.',
+        message.message_id
     );
 }
 

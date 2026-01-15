@@ -1,5 +1,5 @@
 import { Env, Config, TelegramCallbackQuery } from './types';
-import { answerCallbackQuery, deleteMessage, getChatAdministrators, banChatMember, unbanChatMember } from './telegram';
+import { answerCallbackQuery, deleteMessage, getChatAdministrators, banChatMember, unbanChatMember, isAdmin } from './telegram';
 import * as state from './state';
 
 /**
@@ -107,10 +107,9 @@ async function handleKick(
     query: TelegramCallbackQuery
 ): Promise<string> {
     // Check if clicker is an admin
-    const admins = await getChatAdministrators(config, chatId);
-    const isAdmin = admins.some((admin: any) => admin.user.id === clicker);
+    const isAdminUser = await isAdmin(config, chatId, clicker);
 
-    if (!isAdmin) {
+    if (!isAdminUser) {
         throw new Error('Only administrators can kick users');
     }
 
