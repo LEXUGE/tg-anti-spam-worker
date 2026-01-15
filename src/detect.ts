@@ -53,7 +53,7 @@ export async function checkSpam(
             contents: prompt,
             config: {
                 responseMimeType: 'application/json',
-                responseJsonSchema: spamCheckSchema.toJSONSchema({ target: "openapi-3.0" }),
+                responseSchema: spamCheckSchema.toJSONSchema({ target: "openapi-3.0" }),
                 systemInstruction: SYSTEM_PROMPT,
                 thinkingConfig: {
                     thinkingLevel: ThinkingLevel.LOW,
